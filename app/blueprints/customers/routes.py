@@ -5,6 +5,7 @@ from sqlalchemy import select
 from app.models import db, Customer
 from . import customers_bp
 from app.extensions import limiter, cache
+from app.utils.util import encode_token, token_required
 
 # create a new customer
 @customers_bp.route('', methods=['POST'])
@@ -71,3 +72,39 @@ def delete_customer(customer_id):
     db.session.delete(customer)
     db.session.commit()
     return jsonify({'message': f'Customer: {customer_id} deleted successfully'}), 200
+
+#customer login
+@customers_bp.route('/login', methods=['POST'])
+def login():
+    try:
+        credentials = request.json
+        username = credentials['email']
+        password = credentials['password']
+    except KeyError:
+        return jsonify({'message': 'Invalid payload, expecting username and password'}), 400
+    
+    query = select(Customer).where(Customer.email == username)
+    customer = db.session.execute(query).scalar_one_or_none()
+
+    if customer and customer.password == password:
+        auth_token = encode_token(customer.id, customer.role.role_name)
+
+        response = {
+            "status": "success",
+            "message": "Successfully logged in.",
+            "auth_token": auth_token
+        }
+        return jsonify(response), 200
+    else:
+        return jsonify({'message': 'Invalid email or password'}), 401
+    
+
+    @customers_bp.route('/', methods=['DELETE'])
+    @token_required
+    def delete_customer(customer_id):
+        query = select(Customer).where(Customer.id == customer_id)
+        customer = db.session.execute(query).scalars().first()
+
+        db.session.delete(customer)
+        db.session.commit()
+        return jsonify({'message': f'Customer: {customer_id} deleted successfully'}), 200
