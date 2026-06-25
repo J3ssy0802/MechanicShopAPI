@@ -4,10 +4,11 @@ from marshmallow import ValidationError
 from sqlalchemy import select
 from app.models import db, Customer
 from . import customers_bp
-
+from app.extensions import limiter, cache
 
 # create a new customer
 @customers_bp.route('', methods=['POST'])
+@limiter.limit("10 per hour") # limit to 10 requests per hour for this endpoint to prevent abuse
 def create_customer():
     try:
         customer_data = customer_schema.load(request.json)
@@ -27,6 +28,7 @@ def create_customer():
 
 # get all customers
 @customers_bp.route('', methods=['GET'])
+@cache.cached(timeout=120) # cache the response for 120 seconds to improve performance due to potentially expensive database query for repetitive requests
 def get_customers():
     query = select(Customer)
     customers = db.session.execute(query).scalars().all()
@@ -34,6 +36,7 @@ def get_customers():
     
 # get customer by id
 @customers_bp.route('/<int:customer_id>', methods=['GET'])
+@limiter.limit("10 per hour") # limit to 10 requests per hour for this endpoint to prevent abuse
 def get_customer(customer_id):
     customer = db.session.get(Customer, customer_id)
     if customer:
