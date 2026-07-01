@@ -1,4 +1,4 @@
-from .schemas import service_ticket_schema, service_tickets_schema
+from .schemas import service_ticket_schema, service_tickets_schema, edit_service_ticket_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
 from sqlalchemy import select
@@ -37,23 +37,34 @@ def assign_mechanic(ticket_id, mechanic_id):
     db.session.commit()
     return service_ticket_schema.jsonify(ticket), 200
 
-#remove a mechanic from a service ticket
-@service_tickets_bp.route('/<int:ticket_id>/remove_mechanic/<int:mechanic_id>', methods=['PUT'])
-def remove_mechanic(ticket_id, mechanic_id):
-    ticket = db.session.get(service_ticket, ticket_id)
-    if not ticket:
-        return jsonify({'message': 'Service ticket not found'}), 404
+#update mechanics assigned to a service ticket
+@service_tickets_bp.route('/<int:ticket_id>/update_mechanics', methods=['PUT'])
+def update_mechanic(ticket_id):
+    try:
+        service_ticket_edit = edit_service_ticket_schema.load(request.json)
+    except ValidationError as e:
+        return jsonify(e.messages), 400
     
-    mechanic = db.session.get(Mechanic, mechanic_id)
-    if not mechanic:
-        return jsonify({'message': 'Mechanic not found'}), 404
-    
-    if mechanic not in ticket.mechanics:
-        return jsonify({'message': 'Mechanic not assigned to this ticket'}), 200
+    query = select(service_ticket).where(service_ticket.id == ticket_id)
+    ticket = db.session.execute(query).scalars().first()
 
-    ticket.mechanics.remove(mechanic)
+    for mechanic_id in service_ticket_edit['add_mechanic_id']:
+        query = select(Mechanic).where(Mechanic.id == mechanic_id)
+        mechanic = db.session.execute(query).scalars().first()
+
+        if mechanic and mechanic not in ticket.mechanics:
+            ticket.mechanics.append(mechanic)
+
+    for mechanic_id in service_ticket_edit['remove_mechanic_id']:
+        query = select(Mechanic).where(Mechanic.id == mechanic_id)
+        mechanic = db.session.execute(query).scalars().first()
+
+        if mechanic and mechanic in ticket.mechanics:
+            ticket.mechanics.remove(mechanic)
+
     db.session.commit()
     return service_ticket_schema.jsonify(ticket), 200
+
 
 #get all service tickets
 @service_tickets_bp.route('', methods=['GET'])

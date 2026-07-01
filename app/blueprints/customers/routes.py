@@ -30,11 +30,19 @@ def create_customer():
 
 # get all customers
 @customers_bp.route('', methods=['GET'])
-@cache.cached(timeout=120) # cache the response for 120 seconds to improve performance due to potentially expensive database query for repetitive requests
+#@cache.cached(timeout=120) # cache the response for 120 seconds to improve performance due to potentially expensive database query for repetitive requests
 def get_customers():
-    query = select(Customer)
-    customers = db.session.execute(query).scalars().all()
-    return customers_schema.jsonify(customers), 200
+
+    try:
+        page = int(request.args.get('page'))
+        per_page = int(request.args.get('per_page'))
+        query = select(Customer)
+        customers = db.paginate(query, page=page, per_page=per_page).items
+        return customers_schema.jsonify(customers), 200
+    except:
+        query = select(Customer)
+        customers = db.session.execute(query).scalars().all()
+        return customers_schema.jsonify(customers), 200
     
 # get customer by id
 @customers_bp.route('/<int:customer_id>', methods=['GET'])

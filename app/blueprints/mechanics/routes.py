@@ -1,8 +1,8 @@
 from .schemas import mechanic_schema, mechanics_schema
 from flask import request, jsonify
 from marshmallow import ValidationError
-from sqlalchemy import select
-from app.models import db, Mechanic
+from sqlalchemy import select, func
+from app.models import db, Mechanic, service_ticket_mechanic
 from . import mechanics_bp
 
 #create a new mechanic
@@ -28,6 +28,27 @@ def create_mechanic():
 @mechanics_bp.route('', methods=['GET'])
 def get_mechanics():
     query = select(Mechanic)
+    mechanics = db.session.execute(query).scalars().all()
+    return mechanics_schema.jsonify(mechanics), 200
+
+# get mechanics ordered by number of tickets worked (highest first)
+@mechanics_bp.route('/most-tickets', methods=['GET'])
+def get_mechanics_by_ticket_count():
+    ticket_count_subquery = (
+        select(
+            service_ticket_mechanic.c.mechanic_id,
+            func.count(service_ticket_mechanic.c.service_ticket_id).label('ticket_count')
+        )
+        .group_by(service_ticket_mechanic.c.mechanic_id)
+        .subquery()
+    )
+
+    query = (
+        select(Mechanic)
+        .outerjoin(ticket_count_subquery, Mechanic.id == ticket_count_subquery.c.mechanic_id)
+        .order_by(func.coalesce(ticket_count_subquery.c.ticket_count, 0).desc(), Mechanic.id.asc())
+    )
+
     mechanics = db.session.execute(query).scalars().all()
     return mechanics_schema.jsonify(mechanics), 200
 
