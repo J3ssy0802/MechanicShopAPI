@@ -17,7 +17,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\": \"Rupert Billingsly\",\r\n    \"email\": \"rupert@email.com\",\r\n    \"password\": \"123456\"\r\n}",
+              "raw": "{\r\n    \"name\": \"Heather Polish\",\r\n    \"email\": \"HPolish@email.com\",\r\n    \"password\": \"123456\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -54,7 +54,7 @@
               "raw": "{\r\n    \"name\": \"Sally Fields\",\r\n    \"email\": \"sally@email.com\",\r\n    \"password\": \"1234\"\r\n}"
             },
             "url": {
-              "raw": "http://127.0.0.1:5000/customers",
+              "raw": "http://127.0.0.1:5000/customers?page=2&per_page=3",
               "protocol": "http",
               "host": [
                 "127",
@@ -65,6 +65,16 @@
               "port": "5000",
               "path": [
                 "customers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "per_page",
+                  "value": "3"
+                }
               ]
             }
           },
@@ -435,6 +445,210 @@
               "port": "5000",
               "path": [
                 "service_tickets"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EDIT mechanic on service ticket",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n \"remove_mechanic_id\": [4],\r\n \"add_mechanic_id\": [7]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/service_tickets/1/update_mechanics",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "service_tickets",
+                "1",
+                "update_mechanics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "add inventory to service ticket",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/service_tickets/1/assign_inventory/3",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "service_tickets",
+                "1",
+                "assign_inventory",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "CREATE inventory item",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"12V battery\",\r\n    \"price\": 150\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/inventory",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "inventory"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET all inventory items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/inventory",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "inventory"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET inventory by id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"12V battery\",\r\n    \"price\": 150\r\n}"
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/inventory/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "inventory",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE inventory by id",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"lugnuts(50)\",\r\n    \"price\": 5.00\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/inventory/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "inventory",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE inventory item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/inventory/1",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "inventory",
+                "1"
               ]
             }
           },

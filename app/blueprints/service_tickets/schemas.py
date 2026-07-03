@@ -5,17 +5,22 @@ from marshmallow import fields
 class ServiceTicketSchema(ma.SQLAlchemyAutoSchema):
     customer = fields.Nested('CustomerSchema', only=['id', 'name'])
     mechanics = fields.Nested('MechanicSchema', many=True, only=['id', 'name'])
+    inventory_items = fields.Nested('InventorySchema', many=True, only=['id', 'name', 'price'])
     class Meta:
         model = service_ticket
         include_fk = True
-        fields = ('id', 'customer_id', 'VIN', 'service_date', 'service_description', 'customer', 'mechanics')
+        fields = ('id', 'customer_id', 'VIN', 'service_date', 'service_description', 'customer', 'mechanics', 'inventory_items')
 
 class EditServiceTicketSchema(ma.Schema):
         add_mechanic_id = fields.List(fields.Int(), required=True)
         remove_mechanic_id = fields.List(fields.Int(), required=True)
         class Meta:
             fields = ('add_mechanic_id', 'remove_mechanic_id')
+
+class ServiceTicketInventorySchema(ma.Schema):
+    inventory_item_id = fields.Int(required=True)
         
 service_ticket_schema = ServiceTicketSchema()
 service_tickets_schema = ServiceTicketSchema(many=True)
 edit_service_ticket_schema = EditServiceTicketSchema()
+service_ticket_inventory_schema = ServiceTicketInventorySchema()

@@ -2,7 +2,7 @@ from .schemas import service_ticket_schema, service_tickets_schema, edit_service
 from flask import request, jsonify
 from marshmallow import ValidationError
 from sqlalchemy import select
-from app.models import db, service_ticket, Mechanic
+from app.models import Inventory, db, service_ticket, Mechanic
 from . import service_tickets_bp
 
 
@@ -71,3 +71,21 @@ def update_mechanic(ticket_id):
 def get_all_service_tickets():
     tickets = db.session.execute(select(service_ticket)).scalars().all()
     return service_tickets_schema.jsonify(tickets), 200
+
+#assign an inventory item to a service ticket
+@service_tickets_bp.route('/<int:ticket_id>/assign_inventory/<int:inventory_id>', methods=['PUT'])
+def assign_inventory(ticket_id, inventory_id):
+    ticket = db.session.get(service_ticket, ticket_id)
+    if not ticket:
+        return jsonify({'message': 'Service ticket not found'}), 404
+
+    inventory_item = db.session.get(Inventory, inventory_id)
+    if not inventory_item:
+        return jsonify({'message': 'Inventory item not found'}), 404
+    
+    if inventory_item in ticket.inventory_items:
+        return jsonify({'message': 'Inventory item already assigned to this ticket'}), 200
+
+    ticket.inventory_items.append(inventory_item)
+    db.session.commit()
+    return service_ticket_schema.jsonify(ticket), 200
