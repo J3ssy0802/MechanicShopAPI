@@ -53,10 +53,15 @@ def get_customer(customer_id):
         return customer_schema.jsonify(customer), 200
     return jsonify({'message': 'Customer not found'}), 404
 
-# update customer by id  
-@customers_bp.route('/<int:customer_id>', methods=['PUT'])
+# update customer by id
+@customers_bp.route('/', methods=['PUT'])
 @token_required
 def update_customer(customer_id):
+    try:
+        customer_id = int(customer_id)
+    except (TypeError, ValueError):
+        return jsonify({'message': 'Token is invalid!'}), 401
+
     customer = db.session.get(Customer, customer_id)
     if not customer:
         return jsonify({'message': 'Customer not found'}), 404
@@ -66,8 +71,8 @@ def update_customer(customer_id):
     except ValidationError as e:
         return jsonify(e.messages), 400
     
-    for key, value in customer_data.items():
-        setattr(customer, key, value)
+    for field, value in customer_data.items():
+        setattr(customer, field, value)
     
     db.session.commit()
     return customer_schema.jsonify(customer), 200
@@ -86,7 +91,7 @@ def login():
     customer = db.session.execute(query).scalar_one_or_none()
 
     if customer and customer.password == password:
-        auth_token = encode_token(customer.id, customer.role.role_name)
+        auth_token = encode_token(customer.id)
 
         response = {
             "status": "success",

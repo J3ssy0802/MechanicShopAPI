@@ -44,13 +44,23 @@ def get_mechanics_by_ticket_count():
     )
 
     query = (
-        select(Mechanic)
+        select(
+            Mechanic,
+            func.coalesce(ticket_count_subquery.c.ticket_count, 0).label('ticket_count')
+        )
         .outerjoin(ticket_count_subquery, Mechanic.id == ticket_count_subquery.c.mechanic_id)
         .order_by(func.coalesce(ticket_count_subquery.c.ticket_count, 0).desc(), Mechanic.id.asc())
     )
 
-    mechanics = db.session.execute(query).scalars().all()
-    return mechanics_schema.jsonify(mechanics), 200
+    mechanics_with_counts = db.session.execute(query).all()
+    response_payload = []
+
+    for mechanic, ticket_count in mechanics_with_counts:
+        mechanic_data = mechanic_schema.dump(mechanic)
+        mechanic_data['ticket_count'] = int(ticket_count)
+        response_payload.append(mechanic_data)
+
+    return jsonify(response_payload), 200
 
 # get mechanic by id
 @mechanics_bp.route('/<int:mechanic_id>', methods=['GET'])
