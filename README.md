@@ -12,6 +12,8 @@ REST API for a mechanic shop built with Flask, SQLAlchemy, and Marshmallow.
 - JWT token utility + token-protected customer routes
 - Rate limiting support via Flask-Limiter
 - Caching support via Flask-Caching
+- OpenAPI/Swagger documentation via Swagger UI
+- Unit tests for customers, mechanics, inventory, and service tickets
 
 ## Tech Stack
 
@@ -76,6 +78,34 @@ API base URL: `http://127.0.0.1:5000`
 python reset_db.py
 ```
 
+## Testing
+
+The project uses Python's built-in `unittest` test runner.
+
+Run the full test suite:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+
+Run a single test module:
+
+```bash
+python -m unittest tests.test_customer
+python -m unittest tests.test_mechanic
+python -m unittest tests.test_inventory
+python -m unittest tests.test_service_tickets
+```
+
+Current test files:
+
+- `tests/test_customer.py`
+- `tests/test_mechanic.py`
+- `tests/test_inventory.py`
+- `tests/test_service_tickets.py`
+
+Testing uses `TestingConfig` (SQLite: `sqlite:///testing.db`) from `config.py`.
+
 ## Authentication
 
 Token-protected routes use an `Authorization` header with bearer token format:
@@ -86,9 +116,20 @@ Authorization: Bearer <jwt_token>
 
 Current customer routes decorated with `@token_required`:
 
-- `PUT /customers/<customer_id>`
+- `PUT /customers/`
 - `DELETE /customers/`
 - `GET /customers/my-tickets`
+
+## API Documentation
+
+Swagger UI is available when the app is running:
+
+- UI: `http://127.0.0.1:5000/api/docs`
+- OpenAPI file: `app/static/swagger.yaml`
+
+You can also import and use the included Postman collection:
+
+- `MechanicShop.postman_collection.json`
 
 ## API Endpoints
 
@@ -99,7 +140,7 @@ Current customer routes decorated with `@token_required`:
 | POST | `/customers` | Create customer |
 | GET | `/customers` | List customers (supports optional `page` and `per_page` query params) |
 | GET | `/customers/<customer_id>` | Get customer by id |
-| PUT | `/customers/<customer_id>` | Update customer (token required) |
+| PUT | `/customers/` | Update authenticated customer (token required) |
 | POST | `/customers/login` | Customer login |
 | DELETE | `/customers/` | Delete authenticated customer (token required) |
 | GET | `/customers/my-tickets` | Get authenticated customer tickets (token required) |
