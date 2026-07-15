@@ -67,7 +67,7 @@ def update_customer(customer_id):
         return jsonify({'message': 'Customer not found'}), 404
     
     try:
-        customer_data = customer_schema.load(request.json)
+        customer_data = customer_schema.load(request.json, partial=True)
     except ValidationError as e:
         return jsonify(e.messages), 400
     
@@ -91,12 +91,12 @@ def login():
     customer = db.session.execute(query).scalar_one_or_none()
 
     if customer and customer.password == password:
-        auth_token = encode_token(customer.id)
+        token = encode_token(customer.id)
 
         response = {
             "status": "success",
             "message": "Successfully logged in.",
-            "auth_token": auth_token
+            "token": token
         }
         return jsonify(response), 200
     else:
