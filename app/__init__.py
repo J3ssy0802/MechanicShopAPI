@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from .extensions import ma, limiter, cache
 from .models import db
 from .blueprints.customers import customers_bp
@@ -35,5 +35,13 @@ def create_app(config_name):
     app.register_blueprint(service_tickets_bp, url_prefix='/service_tickets')
     app.register_blueprint(inventories_bp, url_prefix='/inventory')
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+
+    @app.get('/')
+    def root_health():
+        return jsonify({'status': 'ok', 'service': 'MechanicShop API'}), 200
+
+    @app.get('/healthz')
+    def healthz():
+        return jsonify({'status': 'ok'}), 200
     
     return app

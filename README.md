@@ -254,6 +254,32 @@ MechanicShop/
 `-- README.md
 ```
 
+## Deploying To Render
+
+Use these settings when creating a Render Web Service for this project:
+
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `gunicorn flask_app:app`
+- Health Check Path: `/healthz`
+
+### Required Environment Variables
+
+Set the following environment variable in Render:
+
+- `SQLALCHEMY_DATABASE_URI`
+
+Example (Render Postgres connection string):
+
+```text
+postgresql+psycopg2://<user>:<password>@<host>:<port>/<database>
+```
+
+### Why These Settings
+
+- The app exposes both `/` and `/healthz` endpoints that return HTTP 200 for health checks.
+- `gunicorn flask_app:app` imports the Flask app object without running the local development server.
+- The app reads `PORT` automatically in `flask_app.py` when run directly.
+
 ## Notes
 
 - `db.create_all()` runs on app startup in `app.py`.
