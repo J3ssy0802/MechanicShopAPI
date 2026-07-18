@@ -1,6 +1,6 @@
 # MechanicShop API
 
-REST API for a mechanic shop built with Flask, SQLAlchemy, and Marshmallow.
+REST API for a mechanic shop built with Flask, SQLAlchemy, and Marshmallow
 
 ## What Is Included
 
